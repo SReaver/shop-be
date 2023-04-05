@@ -1,7 +1,10 @@
 const products = require('../products.json')
 module.exports = async () => {
-  return await {
+  return {
+		headers: {
+			"content-type": "application/json"
+		},
     statusCode: 200,
-    body: products
+    body: JSON.stringify(products)
   };
 }

@@ -1,19 +1,23 @@
 const products = require('../products.json')
 module.exports = async (event) => {
-	const {pathParameters: { id }} = event;
-	const findedProduct = await products.filter(product => product.id === id )[0]
-
+	const { pathParameters: { id }} = event;
+	const findedProduct = products.filter(product => product.id === id )[0]
+	const headers = {
+		"content-type": "application/json"
+	}
 	if (!findedProduct){
-		return await { 
+		return { 
+			headers,
 			statusCode: 404,
-			body: {
+			body: JSON.stringify({
 				message: 'Product not found'
-			}
+			})
 		}
 	} else {
-		return await {
+		return {
+			headers,
 			statusCode: 200,
-			body:	findedProduct
+			body:	JSON.stringify(findedProduct)
 		};
 	}
 }
