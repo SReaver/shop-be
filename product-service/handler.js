@@ -9,7 +9,7 @@ const returnParams = (id) => ({
   ProjectionExpression: id,
 });
 
-export const handler = async (event) => {
+export const getProductById = async (event) => {
 	const { pathParameters: { id }} = event;
 	const params = returnParams(id)
 	const findedProduct = await ddbClient.send(new GetItemCommand(params));
