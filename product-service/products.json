@@ -1,0 +1,38 @@
+ [
+  {
+    "description": "Good choise for typing novel",
+    "id": "1",
+    "price": 500,
+    "title": "MacBook Air 2017"
+  },
+  {
+    "description": "Nice but old guy",
+    "id": "2",
+    "price": 400,
+    "title": "MacBook Pro 2013"
+  },
+  {
+    "description": "Good old guy",
+    "id": "3",
+    "price": 1500,
+    "title": "MacBook Pro 2019"
+  },
+  {
+    "description": "Strongest guy",
+    "id": "4",
+    "price": 3000,
+    "title": "MacBook Pro M2 Max 2022"
+  },
+  {
+    "description": "Nice choise for every type of wwork",
+    "id": "5",
+    "price": 2200,
+    "title": "MacBook Pro M1 2021"
+  },
+  {
+    "description": "Small and fast",
+    "id": "6",
+    "price": 1500,
+    "title": "MacBook Air M1"
+  }
+]
