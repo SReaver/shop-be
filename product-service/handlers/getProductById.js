@@ -1,9 +1,22 @@
-const products = require('../products.json')
-module.exports = async (event) => {
+import { GetItemCommand } from "@aws-sdk/client-dynamodb";
+import { ddbClient } from "../ddbClient.js";
+
+const returnParams = (id) => ({
+  TableName: "products",
+  Key: {
+    KEY_NAME: { N: "id" },
+  },
+  ProjectionExpression: id,
+});
+
+export const getProductById = async (event) => {
 	const { pathParameters: { id }} = event;
-	const findedProduct = products.filter(product => product.id === id )[0]
+	const params = returnParams(id)
+	const findedProduct = await ddbClient.send(new GetItemCommand(params));
 	const headers = {
-		"content-type": "application/json"
+		"Access-Control-Allow-Credentials": true,
+		"Access-Control-Allow-Origin": "*",
+		"Content-Type": "application/json",
 	}
 	if (!findedProduct){
 		return { 

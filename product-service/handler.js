@@ -1,9 +1,36 @@
-'use strict';
+import { GetItemCommand } from "@aws-sdk/client-dynamodb";
+import { ddbClient } from "./ddbClient.js";
 
-const getProductList = require('./handlers/getProductList');
-const getProductById = require('./handlers/getProductById');
+const returnParams = (id) => ({
+  TableName: "products",
+  Key: {
+    KEY_NAME: { N: "id" },
+  },
+  ProjectionExpression: id,
+});
 
-module.exports = {
-	getProductList,
-	getProductById
-};
+export const handler = async (event) => {
+	const { pathParameters: { id }} = event;
+	const params = returnParams(id)
+	const findedProduct = await ddbClient.send(new GetItemCommand(params));
+	const headers = {
+		"Access-Control-Allow-Credentials": true,
+		"Access-Control-Allow-Origin": "*",
+		"Content-Type": "application/json",
+	}
+	if (!findedProduct){
+		return { 
+			headers,
+			statusCode: 404,
+			body: JSON.stringify({
+				message: 'Product not found'
+			})
+		}
+	} else {
+		return {
+			headers,
+			statusCode: 200,
+			body:	JSON.stringify(findedProduct)
+		};
+	}
+}

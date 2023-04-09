@@ -60,7 +60,7 @@ provider:
 
 functions:
   getProductById:
-    handler: handler.getProductById
+    handler: handler.handler
     url:
       cors: true
     events:
