@@ -18,6 +18,13 @@ export const getProductById = async (event) => {
 		"Access-Control-Allow-Origin": "*",
 		"Content-Type": "application/json",
 	}
+	return { 
+		headers,
+		statusCode: 200,
+		body: JSON.stringify({
+			message: id
+		})
+	}
 	if (!findedProduct){
 		return { 
 			headers,

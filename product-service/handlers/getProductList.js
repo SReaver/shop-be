@@ -1,4 +1,11 @@
 import products from '../products.json' assert { type: `json` };
+import {
+  DynamoDBDocumentClient,
+  ScanCommand,
+  PutCommand,
+  GetCommand,
+  DeleteCommand,
+} from "@aws-sdk/lib-dynamodb";
 
 export const getProductList = async () => {
   return {

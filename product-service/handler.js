@@ -1,24 +1,40 @@
 import { GetItemCommand } from "@aws-sdk/client-dynamodb";
 import { ddbClient } from "./ddbClient.js";
 
-const returnParams = (id) => ({
-  TableName: "products",
-  Key: {
-    KEY_NAME: { N: "id" },
-  },
-  ProjectionExpression: id,
-});
+const headers = {
+	"Access-Control-Allow-Credentials": true,
+	"Access-Control-Allow-Origin": "*",
+	"Content-Type": "application/json",
+}
+
+const returnParams = (id) => (
+ {
+		TableName: "products",
+		Key: {
+			'id': {S: id}
+		}
+	}
+);
 
 export const getProductById = async (event) => {
 	const { pathParameters: { id }} = event;
 	const params = returnParams(id)
-	const findedProduct = await ddbClient.send(new GetItemCommand(params));
-	const headers = {
-		"Access-Control-Allow-Credentials": true,
-		"Access-Control-Allow-Origin": "*",
-		"Content-Type": "application/json",
+	let findedProduct;
+
+	try {
+		findedProduct = await ddbClient.send(new GetItemCommand(params));
+	} catch (error) {
+		return { 
+			headers,
+			statusCode: 500,
+			body: JSON.stringify({
+				message: error.message,
+				id
+			})
+		}
 	}
-	if (!findedProduct){
+
+	if (!findedProduct?.Item){
 		return { 
 			headers,
 			statusCode: 404,
@@ -30,7 +46,7 @@ export const getProductById = async (event) => {
 		return {
 			headers,
 			statusCode: 200,
-			body:	JSON.stringify(findedProduct)
+			body:	JSON.stringify(findedProduct.Item)
 		};
 	}
 }
