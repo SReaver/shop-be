@@ -1,5 +1,5 @@
 import { GetItemCommand } from "@aws-sdk/client-dynamodb";
-import { ddbClient } from "./ddbClient.js";
+import { ddbClient } from "../ddbClient.js";
 
 const headers = {
 	"Access-Control-Allow-Credentials": true,

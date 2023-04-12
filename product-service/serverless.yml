@@ -60,7 +60,7 @@ provider:
 
 functions:
   getProductById:
-    handler: handler.getProductById
+    handler: lambda/getProductById.getProductById
     url:
       cors: true
     events:
@@ -68,7 +68,7 @@ functions:
           path: /product/{id}
           method: get
   getProductList:
-    handler: handler.getProductList
+    handler: lambda/getProductList.getProductList
     url:
       cors: true
     events:
