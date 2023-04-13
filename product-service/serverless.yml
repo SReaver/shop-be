@@ -25,7 +25,24 @@ provider:
   stage: dev
   runtime: nodejs18.x
   region: eu-west-1
-
+  lambdaHashingVersion: '20201221'
+  environment:
+    DYNAMODB_TABLE: products
+  httpApi:
+    cors: true
+# you can overwrite defaults here
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: "arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
 
 # you can add statements to the Lambda function's IAM Role here
 #  iam:
@@ -60,24 +77,18 @@ provider:
 functions:
   getProductById:
     handler: lambda/getProductById.getProductById
-    url:
-      cors: true
     events:
       - http:
           path: /product/{id}
           method: get
   getProductList:
     handler: lambda/getProductList.getProductList
-    url:
-      cors: true
     events:
       - http:
           path: /products
           method: get
   createProduct:
     handler: lambda/createProduct.createProduct
-    url:
-      cors: true
     events:
       - http:
           path: /products
@@ -126,3 +137,31 @@ functions:
 #     NewOutput:
 #       Description: "Description for the output"
 #       Value: "Some output value"
+resources:
+  Resources:
+    ProductsDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+    StocksDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: product_id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: product_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: stocks
