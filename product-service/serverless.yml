@@ -22,11 +22,10 @@ frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: nodejs16.x
-  region: eu-west-1
-# you can overwrite defaults here
   stage: dev
- 
+  runtime: nodejs18.x
+  region: eu-west-1
+
 
 # you can add statements to the Lambda function's IAM Role here
 #  iam:

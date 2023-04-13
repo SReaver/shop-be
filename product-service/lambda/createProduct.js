@@ -17,20 +17,22 @@ const getProductParams = (title, price, description) => ({
   },
 });
 export const createProduct = async (event) => {
-	console.log(event)
-	const {title, price, description} = JSON.parse(event.body);
-	console.log(title, price, description);
   try {
-    const data = await ddbClient.send(new PutItemCommand(getProductParams(title, +price, description)));
-    console.log(data);
-    return data;
+		const {title, price, description} = JSON.parse(event.body);
+    const data = await ddbClient.send(new PutItemCommand(getProductParams(title, price, description)));
+    return { 
+			headers,
+			statusCode: 200,
+			body: JSON.stringify({
+				data
+			})
+		};
   } catch (error) {
 		return { 
 			headers,
 			statusCode: 500,
 			body: JSON.stringify({
 				message: error.message,
-				id
 			})
 		}
   }
