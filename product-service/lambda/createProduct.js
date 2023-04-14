@@ -1,39 +1,46 @@
-import { PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { PutCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { v4 as uuidv4 } from 'uuid';
-import { ddbClient } from "../ddbClient.js";
+import { ddbDocClient } from "../libs/ddbDocClient.js";
+import { setRespose } from '../libs/utils.js'
 
-const headers = {
-	"Access-Control-Allow-Credentials": true,
-	"Access-Control-Allow-Origin": "*",
-	"Content-Type": "application/json",
-}
-const getProductParams = (title, price, description) => ({
-  TableName: "products",
-  Item: {
-    id: { S: uuidv4() },
-    price: { N: price },
-		title: { S: title },
-		description: { S: description }
-  },
+const getProductParams = (id, title, price, description) => ({
+	TableName: "products",
+	Item: {
+		id,
+		price,
+		title,
+		description
+	},
 });
+
 export const createProduct = async (event) => {
-  try {
-		const {title, price, description} = JSON.parse(event.body);
-    const data = await ddbClient.send(new PutItemCommand(getProductParams(title, price, description)));
-    return { 
-			headers,
-			statusCode: 200,
-			body: JSON.stringify({
-				data
-			})
-		};
-  } catch (error) {
-		return { 
-			headers,
-			statusCode: 500,
-			body: JSON.stringify({
-				message: error.message,
+	const { title, price, description, count } = JSON.parse(event.body);
+	const id = uuidv4();
+
+	try {
+		await ddbDocClient.send(new PutCommand(getProductParams(id, title, price.toString(), description)))
+	} catch (error) {
+		return setRespose(500, {
+			message: `Cannot save product: ${error.message}`
+		})
+	}
+
+
+	try {
+		await ddbDocClient.send(new PutCommand({ TableName: 'stocks', Item: { product_id: id, count: count.toString() } }))
+	} catch (error) {
+		try {
+			await ddbDocClient.send(new DeleteCommand({ TableName: 'products', Key: { id } }))
+		} catch (error) {
+			return setRespose(500, {
+				message: `Cannot delete product after unsuccessfull insert: ${error.message}`
 			})
 		}
-  }
+		return setRespose(500, {
+			message: `Cannot save product count in stock: ${error.message}`
+		})
+	}
+	return setRespose(201, {
+		message: `Product successfully saved.`
+	})
 }

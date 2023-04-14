@@ -88,6 +88,8 @@ functions:
           method: get
   createProduct:
     handler: lambda/createProduct.createProduct
+    url:
+      cors: true
     events:
       - http:
           path: /products
