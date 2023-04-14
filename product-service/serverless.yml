@@ -25,7 +25,6 @@ provider:
   stage: dev
   runtime: nodejs18.x
   region: eu-west-1
-  lambdaHashingVersion: '20201221'
   environment:
     DYNAMODB_TABLE: products
   httpApi:

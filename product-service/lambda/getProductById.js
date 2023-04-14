@@ -1,52 +1,56 @@
 import { GetItemCommand } from "@aws-sdk/client-dynamodb";
+import { validate as uuidValidate } from 'uuid';
 import { ddbClient } from "../ddbClient.js";
 
-const headers = {
-	"Access-Control-Allow-Credentials": true,
-	"Access-Control-Allow-Origin": "*",
-	"Content-Type": "application/json",
-}
+const setRespose = (code, body) => ({
+	headers: {
+		"Access-Control-Allow-Credentials": "true",
+		"Access-Control-Allow-Origin": "*",
+		"Content-Type": "application/json",
+	},
+	statusCode: code,
+	body: JSON.stringify(body),
+	isBase64Encoded: false
+})
 
-const returnParams = (id) => (
- {
-		TableName: "products",
+const returnParams = (tableName, key, id) => (
+	{
+		TableName: tableName,
 		Key: {
-			'id': {S: id}
+			[key]: { S: id }
 		}
 	}
 );
 
 export const getProductById = async (event) => {
 	const { pathParameters: { id }} = event;
-	const params = returnParams(id)
-	let findedProduct;
-
-	try {
-		findedProduct = await ddbClient.send(new GetItemCommand(params));
-	} catch (error) {
-		return { 
-			headers,
-			statusCode: 500,
-			body: JSON.stringify({
-				message: error.message,
-				id
-			})
-		}
+	if (!uuidValidate(id)) {
+		return setRespose(404, {
+			message: `Incorrect id: ${id}`
+		})
 	}
 
-	if (!findedProduct?.Item){
-		return { 
-			headers,
-			statusCode: 404,
-			body: JSON.stringify({
-				message: 'Product not found'
+	const paramsProduct = returnParams('products', 'id', id);
+	const paramsStock = returnParams('stocks', 'product_id', id);
+
+	return Promise.all([
+		ddbClient.send(new GetItemCommand(paramsProduct)),
+		ddbClient.send(new GetItemCommand(paramsStock))
+	])
+		.then(([productItem, stockItem]) => {
+			if (!productItem?.Item || !stockItem?.Item) {
+				return setRespose(404, {
+					message: 'Product not found'
+				})
+			} else {
+				return setRespose(200, {
+					body: JSON.stringify(Object.assign(productItem.Item, stockItem.Item))
+				})
+			}
+		})
+		.catch(err => {
+			return setRespose(500, {
+				message: err.message
 			})
-		}
-	} else {
-		return {
-			headers,
-			statusCode: 200,
-			body:	JSON.stringify(findedProduct.Item)
-		};
-	}
+		})
 }
