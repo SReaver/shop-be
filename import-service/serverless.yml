@@ -19,19 +19,30 @@ service: import-service
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 frameworkVersion: '3'
+custom:
+  bucket: files-upload-for-macshop
 
 provider:
   name: aws
   stage: dev
   runtime: nodejs18.x
   region: eu-west-1
-  http:
+  httpApi:
     cors: true
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - s3:*
-      Resource: "*"
+  iam:
+    role:
+      statements:
+        # Allow functions to list all buckets
+        - Effect: Allow
+          Action: 's3:ListBucket'
+          Resource: '*'
+        # Allow functions to read/write objects in a bucket
+        - Effect: Allow
+          Action:
+            - 's3:GetObject'
+            - 's3:PutObject'
+          Resource:
+            - 'arn:aws:s3:::${self:custom.bucket}/*'
 # you can overwrite defaults here
 #  stage: dev
 #  region: us-east-1
@@ -79,6 +90,13 @@ functions:
       - http:
           path: /uploaded
           method: get
+      - s3:
+          bucket: ${self:custom.bucket}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: uploaded/
+            - suffix: .csv
+          existing: true
 
 
 #    The following are a few example events you can configure
@@ -127,7 +145,21 @@ resources:
    UploadFilesBucket:
      Type: AWS::S3::Bucket
      Properties:
-       BucketName: files-upload-for-macshop
+       BucketName: ${self:custom.bucket}
+       CorsConfiguration:
+         CorsRules:
+           - AllowedMethods:
+               - "PUT"
+               - "GET"
+               - "POST"
+               - "HEAD"
+               - "DELETE"
+             AllowedOrigins:
+               - "*"
+             AllowedHeaders:
+               - "*"
+             MaxAge: 3000
+                      
       
 #  Outputs:
 #     NewOutput:

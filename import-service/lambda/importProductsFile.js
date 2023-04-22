@@ -9,23 +9,14 @@ const createPresignedUrlWithClient = async ({ region, bucket, key }) => {
 };
 
 export const importProductsFile = async event => {
-	// return setRespose(200, {
-	// 	message: event.queryStringParameters.name
-	// })
-	let fileName;
-	try {
-		const { queryStringParameters: { name } } = event;
-		fileName = name;
-	} catch (error) {
-		return setRespose(500, { message: error.message })
-	}
 
+	const { queryStringParameters: { name } } = event;
 
 	try {
 		const clientUrl = await createPresignedUrlWithClient({
       region: 'eu-west-1',
-      bucket: 'uploaded',
-      key: `uploaded/${fileName}`,
+      bucket: 'files-upload-for-macshop',
+      key: `uploaded/${name}`,
     });
 
 		return setRespose(200, clientUrl);
