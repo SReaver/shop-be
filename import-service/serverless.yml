@@ -22,8 +22,16 @@ frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: nodejs12.x
-
+  stage: dev
+  runtime: nodejs18.x
+  region: eu-west-1
+  http:
+    cors: true
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: "*"
 # you can overwrite defaults here
 #  stage: dev
 #  region: us-east-1
@@ -67,6 +75,11 @@ functions:
           method: get
   importFileParser:
     handler: lambda/importFileParser.importFileParser
+    events:
+      - http:
+          path: /uploaded
+          method: get
+
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
@@ -109,12 +122,13 @@ functions:
 #      variable2: value2
 
 # you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
+resources:
+ Resources:
+   UploadFilesBucket:
+     Type: AWS::S3::Bucket
+     Properties:
+       BucketName: files-upload-for-macshop
+      
 #  Outputs:
 #     NewOutput:
 #       Description: "Description for the output"
