@@ -1,0 +1,13 @@
+aws dynamodb put-item --table-name products --item '{"id": {"S": "e9e5d3cd-613b-4bbb-98fc-930ea851c5a8"},"title": {"S": "MacBook Pro 2013"}, "price": {"N": "400"}, "description": {"S": "Nice but old guy"}}'
+aws dynamodb put-item --table-name products --item '{"id": {"S": "f89d5051-eaa6-4cb0-a4cc-8fa400a5d5bd"},"title": {"S": "MacBook Pro 2019"}, "price": {"N": "1500"}, "description": {"S": "Good old guy"}}'
+aws dynamodb put-item --table-name products --item '{"id": {"S": "a73ca7d3-4972-4d44-989f-a882ab11b33e"},"title": {"S": "MacBook Pro M2 Max 2022"}, "price": {"N": "3000"}, "description": {"S": "Strongest guy"}}'
+aws dynamodb put-item --table-name products --item '{"id": {"S": "1c0b2c9a-d1ad-4937-ab31-322ac4dfae60"},"title": {"S": "MacBook Pro M1 2021"}, "price": {"N": "2200"}, "description": {"S": "Nice choise for every type of wwork"}}'
+aws dynamodb put-item --table-name products --item '{"id": {"S": "06f5d987-6bc6-43a3-a076-1dde7eaab05a"},"title": {"S": "MacBook Air M1"}, "price": {"N": "1500"}, "description": {"S": "Small and fast"}}'
+aws dynamodb put-item --table-name products --item '{"id": {"S": "9dc4a114-f525-4cbd-a5a6-6ab8b6cf14ae"},"title": {"S": "MacBook Air 2017"}, "price": {"N": "500"}, "description": {"S": "Good choise for typing novel"}}'
+
+aws dynamodb put-item --table-name stocks --item '{"product_id": {"S": "e9e5d3cd-613b-4bbb-98fc-930ea851c5a8"}, "count": {"N": "2"}}'
+aws dynamodb put-item --table-name stocks --item '{"product_id": {"S": "f89d5051-eaa6-4cb0-a4cc-8fa400a5d5bd"}, "count": {"N": "3"}}'
+aws dynamodb put-item --table-name stocks --item '{"product_id": {"S": "a73ca7d3-4972-4d44-989f-a882ab11b33e"}, "count": {"N": "4"}}'
+aws dynamodb put-item --table-name stocks --item '{"product_id": {"S": "1c0b2c9a-d1ad-4937-ab31-322ac4dfae60"}, "count": {"N": "5"}}'
+aws dynamodb put-item --table-name stocks --item '{"product_id": {"S": "06f5d987-6bc6-43a3-a076-1dde7eaab05a"}, "count": {"N": "6"}}'
+aws dynamodb put-item --table-name stocks --item '{"product_id": {"S": "9dc4a114-f525-4cbd-a5a6-6ab8b6cf14ae"}, "count": {"N": "7"}}'

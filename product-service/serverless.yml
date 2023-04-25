@@ -22,11 +22,26 @@ frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: nodejs16.x
-  region: eu-west-1
-# you can overwrite defaults here
   stage: dev
- 
+  runtime: nodejs18.x
+  region: eu-west-1
+  environment:
+    DYNAMODB_TABLE: products
+  httpApi:
+    cors: true
+# you can overwrite defaults here
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: "arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
 
 # you can add statements to the Lambda function's IAM Role here
 #  iam:
@@ -60,21 +75,25 @@ provider:
 
 functions:
   getProductById:
-    handler: handler.handler
-    url:
-      cors: true
+    handler: lambda/getProductById.getProductById
     events:
       - http:
           path: /product/{id}
           method: get
   getProductList:
-    handler: handler.getProductList
+    handler: lambda/getProductList.getProductList
+    events:
+      - http:
+          path: /products
+          method: get
+  createProduct:
+    handler: lambda/createProduct.createProduct
     url:
       cors: true
     events:
       - http:
           path: /products
-          method: get
+          method: POST
 #      - websocket: $connect
 #      - s3: ${env:BUCKET}
 #      - schedule: rate(10 minutes)
@@ -119,3 +138,31 @@ functions:
 #     NewOutput:
 #       Description: "Description for the output"
 #       Value: "Some output value"
+resources:
+  Resources:
+    ProductsDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+    StocksDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: product_id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: product_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: stocks
