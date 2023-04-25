@@ -8,3 +8,12 @@ export const setRespose = (code, body) => ({
 	body: JSON.stringify(body),
 	isBase64Encoded: false
 })
+
+export const getSearchParams = (tableName, key, id) => (
+	{
+		TableName: tableName,
+		Key: {
+			[key]: id
+		}
+	}
+);

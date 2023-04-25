@@ -4,7 +4,7 @@ import { formatUrl } from "@aws-sdk/util-format-url";
 import { Hash } from "@aws-sdk/hash-node";
 import { fromEnv } from "@aws-sdk/credential-providers";
 import { HttpRequest } from "@aws-sdk/protocol-http";
-import { setRespose } from '../utils.js'
+import { setRespose } from '../libs/utils.js'
 
 const createPresignedUrlWithoutClient = async ({ region, bucket, key }) => {
 	const url = parseUrl(`https://${bucket}.s3.${region}.amazonaws.com/${key}`);
