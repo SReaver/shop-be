@@ -94,6 +94,14 @@ functions:
       - http:
           path: /products
           method: POST
+  catalogBatchProcess:
+    handler: lambda/catalogBatchProcess.catalogBatchProcess
+    url:
+      cors: true
+    events:
+      - http:
+          path: /products
+          method: POST
 #      - websocket: $connect
 #      - s3: ${env:BUCKET}
 #      - schedule: rate(10 minutes)
