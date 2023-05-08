@@ -1,25 +1,5 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
-# For full config options, check the docs:
-#    docs.serverless.com
-#
-# Happy Coding!
-
 service: product-service
-# app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
-
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
 frameworkVersion: '3'
-
 provider:
   name: aws
   stage: dev
@@ -27,9 +7,14 @@ provider:
   region: eu-west-1
   environment:
     DYNAMODB_TABLE: products
+    QUEUE_NAME: catalogItemsQueue
+    SQS_URL:
+      Ref: SQSQueue
+    TOPIC_NAME: createProductTopic
+    SNS_ARN:
+      Ref: SNSTopic
   httpApi:
     cors: true
-# you can overwrite defaults here
   iam:
     role:
       statements:
@@ -42,6 +27,17 @@ provider:
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
           Resource: "arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+        - Effect: Allow
+          Action: "sqs:*"
+          Resource:
+            - Fn::GetAtt: [SQSQueue, Arn]
+        - Effect: Allow
+          Action: "sqs:*"
+          Resource: "arn:aws:sqs:eu-west-1:747711022835:catalogItemsQueue"
+        - Effect: Allow
+          Action: "sns:*"
+          Resource:
+            Ref: SNSTopic
 
 # you can add statements to the Lambda function's IAM Role here
 #  iam:
@@ -60,18 +56,6 @@ provider:
 #              - - "arn:aws:s3:::"
 #                - "Ref" : "ServerlessDeploymentBucket"
 #                - "/*"
-
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
-
-# you can add packaging information here
-#package:
-#  patterns:
-#    - '!exclude-me.js'
-#    - '!exclude-me-dir/**'
-#    - include-me.js
-#    - include-me-dir/**
 
 functions:
   getProductById:
@@ -96,12 +80,13 @@ functions:
           method: POST
   catalogBatchProcess:
     handler: lambda/catalogBatchProcess.catalogBatchProcess
-    url:
-      cors: true
     events:
-      - http:
-          path: /products
-          method: POST
+      - sqs:
+          batchSize: 5
+          arn:
+            Fn::GetAtt:
+              - SQSQueue
+              - Arn
 #      - websocket: $connect
 #      - s3: ${env:BUCKET}
 #      - schedule: rate(10 minutes)
@@ -131,21 +116,6 @@ functions:
 #            host: example.com
 #            path: /hello
 
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
-
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
 resources:
   Resources:
     ProductsDynamoDbTable:
@@ -174,3 +144,18 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
         TableName: stocks
+    SQSQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:provider.environment.QUEUE_NAME}
+    SNSTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:provider.environment.TOPIC_NAME}
+    SNSSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: sergey_plotnikov1@epam.com
+        Protocol: email
+        TopicArn:
+          Ref: SNSTopic
